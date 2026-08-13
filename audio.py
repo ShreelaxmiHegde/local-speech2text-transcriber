@@ -1,8 +1,9 @@
 import sounddevice as sd
 import numpy as np
 import msvcrt
+from faster_whisper import WhisperModel
 
-fs = 44100
+fs = 16000
 channels = 1
 audio_chunks = []
 recording = True
@@ -16,7 +17,7 @@ def callback(indata, frames, time, status):
     audio_chunks.append(indata.copy())
 
 print("Starting microphone...")
-stream = sd.InputStream(
+stream = sd.InputStream(  
   samplerate=fs,
   channels=channels,
   callback=callback
@@ -29,36 +30,45 @@ try:
     if msvcrt.kbhit():
       key = msvcrt.getch()
 
-      # p
+      # p - pause
       if key == b'p':
         if recording:
           recording = False
           print("\nPAUSED")
 
-      # r
+      # r - resume
       elif key == b'r':
         if not recording:
           recording = True
           print("\nRESUMED")
 
-      # s
+      # enter - finalize
       elif key == b'\r':
-        print("\nFINALIZING...")
+        print("\nRECORDED")
         break
 
 finally:
   stream.stop()
   stream.close()
-  print("Recording stopped.")
 
 # Combine all the chunks received by the callback
 recording = np.concatenate(audio_chunks, axis=0)
+flatten_rec = recording.flatten()
 
-print("Recorded shape:", recording.shape)
-print(recording)
-print("Playing recorded audio...")
-
-sd.play(recording, fs)
+sd.play(recording)
 sd.wait()
 
-print("Playback finished.")
+print("Transcribing...")
+
+model_size = "tiny"
+model = WhisperModel(
+  model_size,
+  device="cpu",
+  compute_type="int8"
+)
+
+segments, info = model.transcribe(flatten_rec, language='en')
+print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+
+for segment in segments:
+  print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
