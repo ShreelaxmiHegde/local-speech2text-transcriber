@@ -44,3 +44,6 @@ Date-based Text File
 - **Timestamped transcripts:** Transcribed segments are stored with their corresponding timestamps.
 - **Hardware-aware inference:** Whisper model configuration is selected based on the available system hardware.
 - **CLI-based interface:** No web server or external UI is required.
+
+---
+<i>It is a small weekend experiment with locally running LLM model and system audio input processing in python.</i>
