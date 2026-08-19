@@ -69,8 +69,14 @@ model = WhisperModel(
 
 segments, info = model.transcribe(flatten_rec, language='en')
 
-for segment in segments:
-  print("Transcription: \n", f"\033[92m{segment.text} \033[0m")
+with open(f"transcription_storage/{date.today().strftime("%d-%m-%Y")}.txt", "a") as f:
+  f.write(f"{datetime.now().strftime("%I:%M %p")}\n")
 
-  with open(f"transcribes/{date.today().strftime("%d-%m-%Y")}.txt", "a") as f:
-    f.write(f"{datetime.now().strftime("%I:%M %p")}\n{segment.text}\n\n ----------------------------------- \n\n")
+for segment in segments:
+  print(f"\033[92m{segment.text} \033[0m")
+
+  with open(f"transcription_storage/{date.today().strftime("%d-%m-%Y")}.txt", "a") as f:
+    f.write(f"{segment.text}")
+
+with open(f"transcription_storage/{date.today().strftime("%d-%m-%Y")}.txt", "a") as f:
+  f.write("\n\n ----------------------------------- \n\n")
