@@ -1,13 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>speech-to-text</title>
-</head>
-<body>
-  <h1>speech-to-text</h1>
-  <button>Speak here</button>
-  <p>Transcription</p>
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Speech to Text</title>
+    <script src="script.js" defer></script>
+  </head>
+
+  <body>
+    <main class="app">
+      <p class="status" id="status"><span class="dot"></span><span id="statusText">Ready to record</span></p>
+
+      <div class="controls">
+        <button class="ctrl start" id="start" aria-label="Start recording">
+          <span class="ic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+        </button>
+        <button class="ctrl" id="pause" aria-label="Pause recording" disabled>
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg></span>
+        </button>
+        <button class="ctrl" id="resume" aria-label="Resume recording" disabled>
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg></span>
+        </button>
+        <button class="ctrl send" id="send" aria-label="Send recording" disabled>
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></svg></span>
+        </button>
+      </div>
+
+      <div class="transcript">
+        <textarea class="box" id="text" placeholder="Your transcribed text will appear here…"></textarea>
+        <button class="copy" id="copy" aria-label="Copy text">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+        </button>
+      </div>
+      <!-- <p class="hint" id="hint" aria-live="polite"></p> -->
+    </main>
+  </body>
 </html>
