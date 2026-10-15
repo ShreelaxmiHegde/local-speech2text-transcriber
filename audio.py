@@ -1,82 +1,59 @@
-import sounddevice as sd
-import numpy as np
+import sys
 import msvcrt
-from faster_whisper import WhisperModel
-from datetime import date, datetime
+from transcriber import AudioTranscriber
 
-fs = 16000
-channels = 1
-audio_chunks = []
-recording = True
 
-def callback(indata, frames, time, status):
-  if status:
-    print("\033[91mAudio status: \033[0m", status)
+def run_cli():
+    transcriber = AudioTranscriber()
+    print("\033[93mStarting microphone...\033[0m")
 
-  # only store audio while recording
-  if recording:
-    audio_chunks.append(indata.copy())
+    ok, msg = transcriber.start()
+    if not ok:
+        print(f"\033[91mError starting microphone: {msg}\033[0m")
+        return
 
-print("\033[93mStarting microphone...\033[0m")
+    print("Controls:")
+    print("  [p]     - Pause")
+    print("  [r]     - Resume")
+    print("  [Enter] - Stop & Transcribe\n")
 
-stream = sd.InputStream(  
-  samplerate=fs,
-  channels=channels,
-  callback=callback
-)
+    try:
+        while True:
+            if msvcrt.kbhit():
+                key = msvcrt.getch()
 
-stream.start()
+                # p - pause
+                if key == b'p':
+                    ok, _ = transcriber.pause()
+                    if ok:
+                        print("\033[95mPAUSED\033[0m")
 
-# recording control keys
-try:
-  while True:
-    if msvcrt.kbhit():
-      key = msvcrt.getch()
+                # r - resume
+                elif key == b'r':
+                    ok, _ = transcriber.resume()
+                    if ok:
+                        print("\033[96mRESUMED\033[0m")
 
-      # p - pause
-      if key == b'p':
-        if recording:
-          recording = False
-          print("\033[95mPAUSED\033[0m")
+                # enter - finalize
+                elif key == b'\r':
+                    print("\033[94mRECORDED\033[0m")
+                    break
+    except KeyboardInterrupt:
+        print("\n\033[93mInterrupted by user.\033[0m")
 
-      # r - resume
-      elif key == b'r':
-        if not recording:
-          recording = True
-          print("\033[96mRESUMED\033[0m")
+    result = transcriber.stop_and_transcribe()
+    if result.get("success"):
+        if result.get("text"):
+            print("\n\033[92mTranscription complete and saved to storage.\033[0m")
+        else:
+            print("\n\033[93mNo audio/speech detected.\033[0m")
+    else:
+        print(f"\n\033[91mTranscription failed: {result.get('error')}\033[0m")
 
-      # enter - finalize
-      elif key == b'\r':
-        print("\033[94mRECORDED\033[0m")
-        break
 
-finally:
-  stream.stop()
-  stream.close()
-
-# Combine all the chunks received by the callback
-recording = np.concatenate(audio_chunks, axis=0)
-flatten_rec = recording.flatten()
-
-print("\n ----- Transcribing ----- \n")
-
-model_size = "tiny"
-model = WhisperModel(
-  model_size,
-  device="cpu",
-  compute_type="int8"
-)
-
-segments, info = model.transcribe(flatten_rec, language='en')
-
-with open(f"transcription_storage/{date.today().strftime("%d-%m-%Y")}.txt", "a") as f:
-  f.write(f"{datetime.now().strftime("%I:%M %p")}\n")
-
-for segment in segments:
-  print(f"\033[92m{segment.text} \033[0m")
-
-  with open(f"transcription_storage/{date.today().strftime("%d-%m-%Y")}.txt", "a") as f:
-    f.write(f"{segment.text}")
-
-with open(f"transcription_storage/{date.today().strftime("%d-%m-%Y")}.txt", "a") as f:
-  f.write("\n\n ----------------------------------- \n\n")
+if __name__ == "__main__":
+    if "--server" in sys.argv:
+        from server import run_server
+        run_server()
+    else:
+        run_cli()

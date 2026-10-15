@@ -2,9 +2,13 @@
   "manifest_version": 3,
   "name": "speech-to-text",
   "version": "1.0",
-  "description": "Speech-to-text chrome extension",
+  "description": "Speech-to-text chrome extension powered by local Faster-Whisper",
   "action": {
     "default_popup": "popup.html",
     "default_icon": {}
-  }
+  },
+  "host_permissions": [
+    "http://127.0.0.1:5000/*",
+    "http://localhost:5000/*"
+  ]
 }

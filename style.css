@@ -61,6 +61,13 @@ h1 {
   background: var(--rec); 
   animation: pulse 1.2s ease-in-out infinite; 
 }
+.status.transcribing .dot {
+  background: var(--accent);
+  animation: pulse 0.8s ease-in-out infinite;
+}
+.status.disconnected .dot {
+  background: #ff5c5c;
+}
 @keyframes pulse { 50% { opacity: .3; } }
 
 .controls { 
